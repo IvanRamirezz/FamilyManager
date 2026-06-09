@@ -397,10 +397,10 @@ export function FormulariosView({ onNavigate }: FormulariosViewProps) {
         ...prev,
         { ...data, id: crypto.randomUUID() },
       ]);
-    } else if (modal && modal !== "add") {
+    } else if (modal && typeof modal === "object") {
       setFields((prev) =>
         prev.map((f) =>
-          f.id === (modal as Field).id ? { ...f, ...data } : f
+          f.id === modal.id ? { ...f, ...data } : f
         )
       );
     }
