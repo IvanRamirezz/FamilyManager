@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
+import { supabase } from "@/lib/supabase";
 import { Sidebar } from "@/components/layout/sidebar";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { CreateGroupModal } from "@/components/dashboard/create-group-modal";
@@ -14,8 +16,39 @@ import { FormulariosView } from "@/components/formularios/formularios-view";
 type View = "Dashboard" | "Grupos" | "Solicitudes" | "Formularios";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [activeView, setActiveView] =
     useState<View>("Dashboard");
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) {
+        router.replace("/login");
+      } else {
+        setChecking(false);
+      }
+    });
+
+    const { data: listener } =
+      supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          if (!session) router.replace("/login");
+        }
+      );
+
+    return () => listener.subscription.unsubscribe();
+  }, [router]);
+
+  if (checking) {
+    return (
+      <main className="min-h-screen bg-[#071E26] flex items-center justify-center">
+        <span className="text-white/40 text-sm">
+          Cargando…
+        </span>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#071E26] text-white flex">

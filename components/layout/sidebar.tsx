@@ -5,7 +5,11 @@ import {
   Users,
   ClipboardList,
   FileText,
+  LogOut,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+import { supabase } from "@/lib/supabase";
 
 const items = [
   { name: "Dashboard", icon: Home },
@@ -23,6 +27,13 @@ export function Sidebar({
   activeView,
   onNavigate,
 }: SidebarProps) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.replace("/login");
+  };
+
   return (
     <aside
       className="
@@ -32,6 +43,8 @@ export function Sidebar({
         bg-white/5
         backdrop-blur-xl
         p-6
+        flex
+        flex-col
       "
     >
       <div className="mb-10">
@@ -44,7 +57,7 @@ export function Sidebar({
         </p>
       </div>
 
-      <nav className="space-y-2">
+      <nav className="space-y-2 flex-1">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive =
@@ -78,6 +91,26 @@ export function Sidebar({
           );
         })}
       </nav>
+
+      <button
+        onClick={handleLogout}
+        className="
+          flex
+          w-full
+          items-center
+          gap-3
+          rounded-2xl
+          px-4
+          py-3
+          text-white/50
+          transition
+          hover:bg-white/10
+          hover:text-white/80
+        "
+      >
+        <LogOut size={20} />
+        Cerrar sesión
+      </button>
     </aside>
   );
 }

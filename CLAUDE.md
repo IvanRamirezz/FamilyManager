@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev      # start dev server at localhost:3000
 npm run build    # production build
+npm run start    # start production server (after build)
 npm run lint     # run ESLint
 ```
 
@@ -26,7 +27,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
 Admin dashboard (single page, Spanish UI) for managing Nintendo Online family groups sold commercially.
 
-**Stack:** Next.js + React 19, Tailwind CSS v4 (`@tailwindcss/postcss`), Supabase (client-side only via `@supabase/supabase-js`), shadcn/ui (`base-nova` style), `lucide-react` icons, Manrope font, `tesseract.js` (client-side OCR for screenshot import).
+**Stack:** Next.js 16 + React 19, Tailwind CSS v4 (`@tailwindcss/postcss`), Supabase (client-side only via `@supabase/supabase-js`), shadcn/ui (`base-nova` style), `lucide-react` icons, Manrope font, `tesseract.js` (client-side OCR for screenshot import). Next.js 16 has breaking changes vs prior versions — per `AGENTS.md`, read `node_modules/next/dist/docs/` before adding new Next.js-specific code.
+
+**Installed but unused:** `@anthropic-ai/sdk` and `framer-motion` are in `package.json` but not yet used in any source file.
 
 **Path alias:** `@/` resolves to the project root.
 
@@ -124,7 +127,7 @@ create policy "allow auth all" on solicitudes for all to authenticated using (tr
 - `components/dashboard/groups-table.tsx` — card grid with search/pagination; `EditGroupModal` (edits correo, password, fecha_inicio, miembros); `MembersModal` (shows members from `miembros_grupo`, screenshot OCR import via tesseract.js, add/remove members)
 - `components/dashboard/expiring-groups.tsx` — groups with `fecha_fin` within 30 days
 - `components/dashboard/recent-activity.tsx` — last 5 groups as activity feed
-- `app/solicitud/page.tsx` — public form; inserts into `solicitudes` with `estado = 'pendiente'`
+- `app/solicitud/page.tsx` — public form; inserts into `solicitudes` with `estado = 'pendiente'`. Reads field config from `localStorage` key `fm_form_fields` (same key as `FormulariosView`) with `DEFAULT_FIELDS` fallback. **Same-device caveat:** form customization only applies to visitors on the same browser where the admin edited the form — not server-persisted. Field ids `"1"`–`"4"` map to named DB columns via `DB_COLUMN`; any extra custom fields spill into `comentarios` as concatenated text.
 - `components/solicitudes/solicitudes-table.tsx` — admin view; approve (opens modal) or reject pending solicitudes
 - `components/solicitudes/approve-modal.tsx` — select group, preview WhatsApp message with credentials, opens `wa.me` link
 - `components/formularios/formularios-view.tsx` — form field editor with localStorage persistence (`fm_form_fields`)
