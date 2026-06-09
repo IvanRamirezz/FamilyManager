@@ -98,14 +98,31 @@ export default function SolicitudPage() {
 
     const { error } = await supabase.from("solicitudes").insert(row);
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       console.error(error);
       alert("Error al enviar la solicitud");
       return;
     }
 
+    // Build Telegram message
+    const lines: string[] = ["🎮 <b>Nueva solicitud recibida</b>\n"];
+    for (const field of fields) {
+      const val = values[field.id]?.trim();
+      if (val) lines.push(`<b>${field.label}:</b> ${val}`);
+    }
+    await fetch("/api/notify-telegram", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: lines.join("\n"),
+        email: row.correo ?? "",
+        whatsapp: row.whatsapp ?? "",
+        nombre: row.nombre ?? "",
+      }),
+    }).catch(() => {}); // non-blocking — don't fail the form si Telegram falla
+
+    setLoading(false);
     setSubmitted(true);
   };
 
