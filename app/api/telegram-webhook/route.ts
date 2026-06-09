@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       // Send payment info message
       tg("sendMessage", {
         chat_id: chatId,
-        text: `💳 <b>Datos de pago</b>\n\n<b>Nombre:</b> ${name}\n<b>Número:</b> <code>${number}</code>`,
+        text: `💳 <b>Datos de pago</b>\n\n<b>Banco:</b> NU\n<b>Nombre:</b> ${name}\n<b>Número:</b> <code>${number}</code>`,
         parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
