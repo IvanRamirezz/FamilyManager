@@ -37,6 +37,8 @@ export function SolicitudesTable() {
   const [approving, setApproving] =
     useState<SolicitudParaAprobar | null>(null);
 
+  const [confirmReject, setConfirmReject] = useState<string | null>(null);
+
   useEffect(() => {
     fetchSolicitudes();
   }, []);
@@ -58,15 +60,14 @@ export function SolicitudesTable() {
   };
 
   const reject = async (id: string) => {
-    if (!confirm("¿Rechazar esta solicitud?"))
-      return;
-
     const { error } = await supabase
       .from("solicitudes")
-      .update({ estado: "rechazada" })
+      .delete()
       .eq("id", id);
 
+    setConfirmReject(null);
     if (!error) fetchSolicitudes();
+    else console.error(error);
   };
 
   return (
@@ -193,21 +194,30 @@ export function SolicitudesTable() {
                       <Check size={18} />
                     </button>
 
-                    <button
-                      onClick={() =>
-                        reject(s.id)
-                      }
-                      className="
-                        rounded-xl
-                        bg-red-500/10
-                        p-3
-                        text-red-400
-                        transition
-                        hover:bg-red-500/20
-                      "
-                    >
-                      <X size={18} />
-                    </button>
+                    {confirmReject === s.id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-white/50">¿Rechazar?</span>
+                        <button
+                          onClick={() => reject(s.id)}
+                          className="rounded-xl bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/30"
+                        >
+                          Sí
+                        </button>
+                        <button
+                          onClick={() => setConfirmReject(null)}
+                          className="rounded-xl bg-white/5 px-3 py-1.5 text-xs font-medium text-white/50 transition hover:bg-white/10"
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmReject(s.id)}
+                        className="rounded-xl bg-red-500/10 p-3 text-red-400 transition hover:bg-red-500/20"
+                      >
+                        <X size={18} />
+                      </button>
+                    )}
                   </>
                 )}
               </div>
