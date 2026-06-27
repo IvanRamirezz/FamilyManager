@@ -4,7 +4,6 @@ import {
   Home,
   Users,
   ClipboardList,
-  FileText,
   LogOut,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -14,7 +13,6 @@ import { supabase } from "@/lib/supabase";
 const items = [
   { name: "Dashboard", icon: Home },
   { name: "Grupos", icon: Users },
-  { name: "Formularios", icon: FileText },
   { name: "Solicitudes", icon: ClipboardList },
 ];
 
@@ -37,7 +35,11 @@ export function Sidebar({
   return (
     <aside
       className="
+        sticky
+        top-0
+        h-screen
         w-72
+        shrink-0
         border-r
         border-white/10
         bg-white/5

@@ -53,7 +53,7 @@ function Row({
       <span className="text-sm text-white/50">
         {label}
       </span>
-      <div>{children}</div>
+      <div className="min-w-0">{children}</div>
     </div>
   );
 }
@@ -117,7 +117,7 @@ export function CreateGroupModal() {
     // Group used variants by normalized email
     const byNorm = new Map<string, string[]>();
     for (const row of data) {
-      const key = row.correo_normalizado as string;
+      const key = normalizeEmail(row.correo_normalizado as string);
       if (!byNorm.has(key)) byNorm.set(key, []);
       byNorm.get(key)!.push(row.correo as string);
     }

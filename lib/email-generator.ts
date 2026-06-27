@@ -2,7 +2,7 @@ export function normalizeEmail(email: string) {
   const [local, domain] = email.split("@");
 
   const cleanLocal = local
-    .replace(/\\./g, "")
+    .replace(/\./g, "")
     .split("+")[0];
 
   return `${cleanLocal}@${domain}`.toLowerCase();

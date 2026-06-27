@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { supabase } from "@/lib/supabase";
 
@@ -31,38 +31,62 @@ const DB_COLUMN: Record<string, string> = {
   "4": "correo",
 };
 
-const STORAGE_KEY = "fm_form_fields";
-
 const DEFAULT_FIELDS: Field[] = [
   { id: "1", iconName: "User",  label: "Nombre completo",     titulo: "¿Cuál es tu nombre completo?",                                                type: "Texto corto",        required: true  },
   { id: "2", iconName: "Phone", label: "WhatsApp",            titulo: "Escribe tu número de WhatsApp para agregarte al grupo y tener contacto contigo", type: "Número de teléfono", required: true  },
-  { id: "3", iconName: "User",  label: "Usuario de Nintendo", titulo: "Escribe el nombre de usuario de tu cuenta Nintendo",                           type: "Texto corto",        required: true  },
   { id: "4", iconName: "Mail",  label: "Correo electrónico",  titulo: "Escribe tu correo vinculado a tu cuenta Nintendo",                             type: "Correo",             required: true  },
   { id: "5", iconName: "List",  label: "Grupo Familiar",      titulo: "¿Has estado anteriormente en una familia de Nintendo Switch Online?",          type: "Opciones múltiples", required: true,  options: ["Sí", "No"] },
   { id: "6", iconName: "List",  label: "Tiempo en familia",   titulo: "¿Cuánto tiempo tiene que saliste de esa familia?",                             type: "Opciones múltiples", required: false, options: ["Menos de 1 semana", "Más de 1 mes", "Más de 3 meses", "Más de 1 año"] },
 ];
 
+const COUNTRY_CODES = [
+  { code: "+52", flag: "🇲🇽", name: "México" },
+  { code: "+1",  flag: "🇺🇸", name: "EE.UU. / Canadá" },
+  { code: "+57", flag: "🇨🇴", name: "Colombia" },
+  { code: "+54", flag: "🇦🇷", name: "Argentina" },
+  { code: "+56", flag: "🇨🇱", name: "Chile" },
+  { code: "+51", flag: "🇵🇪", name: "Perú" },
+  { code: "+58", flag: "🇻🇪", name: "Venezuela" },
+  { code: "+593", flag: "🇪🇨", name: "Ecuador" },
+  { code: "+502", flag: "🇬🇹", name: "Guatemala" },
+  { code: "+503", flag: "🇸🇻", name: "El Salvador" },
+  { code: "+504", flag: "🇭🇳", name: "Honduras" },
+  { code: "+505", flag: "🇳🇮", name: "Nicaragua" },
+  { code: "+506", flag: "🇨🇷", name: "Costa Rica" },
+  { code: "+507", flag: "🇵🇦", name: "Panamá" },
+  { code: "+591", flag: "🇧🇴", name: "Bolivia" },
+  { code: "+595", flag: "🇵🇾", name: "Paraguay" },
+  { code: "+598", flag: "🇺🇾", name: "Uruguay" },
+  { code: "+34",  flag: "🇪🇸", name: "España" },
+  { code: "+55",  flag: "🇧🇷", name: "Brasil" },
+];
+
 export default function SolicitudPage() {
-  const [fields, setFields] = useState<Field[]>(DEFAULT_FIELDS);
+  const fields = DEFAULT_FIELDS;
   const [values, setValues] = useState<Record<string, string>>({});
+  const [phonePrefixes, setPhonePrefixes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) setFields(JSON.parse(stored));
-    } catch {
-      // use defaults
-    }
-  }, []);
 
   const set = (id: string, val: string) =>
     setValues((prev) => ({ ...prev, [id]: val }));
 
+  const setPrefix = (id: string, prefix: string) =>
+    setPhonePrefixes((prev) => ({ ...prev, [id]: prefix }));
+
+  const getPhoneValue = (id: string) => {
+    const prefix = phonePrefixes[id] ?? "+52";
+    const number = values[id]?.trim() ?? "";
+    return number ? `${prefix} ${number}` : "";
+  };
+
   const handleSubmit = async () => {
-    // Validate required fields
-    const missing = fields.filter((f) => f.required && !values[f.id]?.trim());
+    // Validate required fields — for phone fields check the number part
+    const missing = fields.filter((f) => {
+      if (!f.required) return false;
+      if (f.type === "Número de teléfono") return !values[f.id]?.trim();
+      return !values[f.id]?.trim();
+    });
     if (missing.length > 0) {
       alert(`Por favor completa: ${missing.map((f) => f.titulo || f.label).join(", ")}`);
       return;
@@ -74,7 +98,7 @@ export default function SolicitudPage() {
     const row: Record<string, string | null> = {
       nombre: null,
       whatsapp: null,
-      usuario_nintendo: null,
+      usuario_nintendo: "",
       correo: null,
       comentarios: null,
       estado: "pendiente",
@@ -83,7 +107,10 @@ export default function SolicitudPage() {
     const extras: string[] = [];
 
     for (const field of fields) {
-      const val = values[field.id]?.trim() ?? null;
+      const raw = field.type === "Número de teléfono"
+        ? getPhoneValue(field.id) || null
+        : values[field.id]?.trim() ?? null;
+      const val = raw;
       const col = DB_COLUMN[field.id];
       if (col) {
         row[col] = val;
@@ -195,6 +222,9 @@ export default function SolicitudPage() {
 
           <div className="space-y-5">
             {fields.map((field) => {
+              // Campo "Tiempo en familia" solo si respondió "Sí" a la pregunta anterior
+              if (field.id === "6" && values["5"] !== "Sí") return null;
+
               const title = field.titulo || field.label;
               const val = values[field.id] ?? "";
 
@@ -229,11 +259,32 @@ export default function SolicitudPage() {
                       placeholder="Tu respuesta"
                       className="w-full resize-none rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-white/30"
                     />
+                  ) : field.type === "Número de teléfono" ? (
+                    <div className="flex gap-2">
+                      <select
+                        value={phonePrefixes[field.id] ?? "+52"}
+                        onChange={(e) => setPrefix(field.id, e.target.value)}
+                        className="rounded-2xl border border-white/10 bg-white/10 px-3 py-3 text-sm text-white outline-none focus:border-white/30 [color-scheme:dark] shrink-0"
+                      >
+                        {COUNTRY_CODES.map((c) => (
+                          <option key={c.code} value={c.code}>
+                            {c.flag} {c.code} {c.name}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        value={val}
+                        onChange={(e) => set(field.id, e.target.value)}
+                        type="tel"
+                        placeholder="Número sin lada"
+                        className="flex-1 min-w-0 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-white/30"
+                      />
+                    </div>
                   ) : (
                     <input
                       value={val}
                       onChange={(e) => set(field.id, e.target.value)}
-                      type={field.type === "Correo" ? "email" : field.type === "Número de teléfono" ? "tel" : "text"}
+                      type={field.type === "Correo" ? "email" : "text"}
                       placeholder="Tu respuesta"
                       className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-white/30"
                     />

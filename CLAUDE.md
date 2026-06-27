@@ -21,6 +21,10 @@ Requires `.env.local`:
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+TELEGRAM_BOT_TOKEN=        # bot token from @BotFather
+TELEGRAM_CHAT_ID=          # chat/group ID where notifications are sent
+TELEGRAM_PAYMENT_NAME=     # account holder name shown in payment message
+TELEGRAM_PAYMENT_NUMBER=   # NU bank card/account number shown in payment message
 ```
 
 ## Architecture
@@ -33,9 +37,21 @@ Admin dashboard (single page, Spanish UI) for managing Nintendo Online family gr
 
 **Path alias:** `@/` resolves to the project root.
 
-### Navigation
+### Routes
 
-`app/page.tsx` is a `"use client"` component that holds a `View` state (`"Dashboard"` | `"Grupos"` | `"Solicitudes"` | `"Formularios"`). It passes `activeView` and `onNavigate` to `<Sidebar>`. No URL routing is used.
+| Path | Access | Purpose |
+|------|--------|---------|
+| `/` | Auth-gated | Admin dashboard; holds `View` state (`"Dashboard"` \| `"Grupos"` \| `"Solicitudes"` \| `"Formularios"`), passes `activeView`/`onNavigate` to `<Sidebar>`. No sub-URL routing. |
+| `/login` | Public | Supabase email+password login; redirects to `/` on success. The root `app/page.tsx` checks `supabase.auth.getSession()` on mount and redirects to `/login` if unauthenticated. |
+| `/solicitud` | Public | Customer sign-up form; reads field config from `localStorage`. |
+| `/referidos` | Public | Static referral landing page (Pixelify Sans font, "Quiet Place" branding). No DB access; referral link and stats are client-state only (prototype). |
+
+### Telegram integration
+
+Two API routes form a bot flow triggered when the public `/solicitud` form is submitted:
+
+- `app/api/notify-telegram/route.ts` — called by the solicitud form; forwards the new request to the Telegram chat (`TELEGRAM_CHAT_ID`) as an HTML message with inline keyboard buttons (copy email, open WhatsApp, "Continuar").
+- `app/api/telegram-webhook/route.ts` — receives Telegram callback queries; handles `show_payment` callback by sending a follow-up message with `TELEGRAM_PAYMENT_NAME`/`TELEGRAM_PAYMENT_NUMBER`. Register this route as the bot webhook via Telegram's `setWebhook` API.
 
 ### Business logic constants
 
@@ -120,7 +136,8 @@ create policy "allow auth all" on solicitudes for all to authenticated using (tr
 
 ## Key components
 
-- `app/page.tsx` — root route; owns view state; composes Sidebar + view content
+- `app/page.tsx` — root route; auth guard + view state; composes Sidebar + view content
+- `app/login/page.tsx` — Supabase auth login form
 - `components/layout/sidebar.tsx` — highlights active view, calls `onNavigate` on click
 - `components/dashboard/stats-cards.tsx` — live group count, expiring soon, new this month; derives cuentas and ganancias
 - `components/dashboard/create-group-modal.tsx` — auto-generates group name, email variant (auto or manual mode), password; validates duplicates before insert
@@ -131,3 +148,4 @@ create policy "allow auth all" on solicitudes for all to authenticated using (tr
 - `components/solicitudes/solicitudes-table.tsx` — admin view; approve (opens modal) or reject pending solicitudes
 - `components/solicitudes/approve-modal.tsx` — select group, preview WhatsApp message with credentials, opens `wa.me` link
 - `components/formularios/formularios-view.tsx` — form field editor with localStorage persistence (`fm_form_fields`)
+- `app/referidos/page.tsx` — public referral landing page; entirely client-side, no DB writes; referral links use a placeholder domain (`misitio.com/ref/…`) and stats are hardcoded/local state

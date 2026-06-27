@@ -7,13 +7,11 @@ import { supabase } from "@/lib/supabase";
 import { Sidebar } from "@/components/layout/sidebar";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { CreateGroupModal } from "@/components/dashboard/create-group-modal";
-import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { ExpiringGroups } from "@/components/dashboard/expiring-groups";
 import { GroupsTable } from "@/components/dashboard/groups-table";
+import { CodigosCard } from "@/components/dashboard/codigos-card";
 import { SolicitudesTable } from "@/components/solicitudes/solicitudes-table";
-import { FormulariosView } from "@/components/formularios/formularios-view";
-
-type View = "Dashboard" | "Grupos" | "Solicitudes" | "Formularios";
+type View = "Dashboard" | "Grupos" | "Solicitudes";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -78,8 +76,7 @@ export default function DashboardPage() {
               <div className="col-span-2">
                 <CreateGroupModal />
               </div>
-
-              <RecentActivity />
+              <CodigosCard />
             </div>
 
             <div className="mt-6">
@@ -94,14 +91,6 @@ export default function DashboardPage() {
 
         {activeView === "Grupos" && (
           <GroupsTable />
-        )}
-
-        {activeView === "Formularios" && (
-          <FormulariosView
-            onNavigate={(view) =>
-              setActiveView(view as View)
-            }
-          />
         )}
 
         {activeView === "Solicitudes" && (
