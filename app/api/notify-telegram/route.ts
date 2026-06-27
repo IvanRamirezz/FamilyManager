@@ -4,7 +4,7 @@ export async function POST(req: NextRequest) {
   const { text, email, whatsapp, nombre } = await req.json();
 
   // Build WhatsApp URL with pre-filled greeting
-  const phone = `52${(whatsapp as string).replace(/\D/g, "")}`;
+  const phone = (whatsapp as string).replace(/\D/g, "");
   const waText = encodeURIComponent(
     `Hola ${nombre}, recibimos tu solicitud para Nintendo Switch Online + Paquete de Expansión 🎮\n\nEn breve te asignamos un grupo y te enviamos los datos de acceso. ¡Gracias!`
   );
