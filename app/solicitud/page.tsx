@@ -40,13 +40,13 @@ const DEFAULT_FIELDS: Field[] = [
 ];
 
 const COUNTRY_CODES = [
-  { code: "+52", flag: "🇲🇽", name: "México" },
-  { code: "+1",  flag: "🇺🇸", name: "EE.UU. / Canadá" },
-  { code: "+57", flag: "🇨🇴", name: "Colombia" },
-  { code: "+54", flag: "🇦🇷", name: "Argentina" },
-  { code: "+56", flag: "🇨🇱", name: "Chile" },
-  { code: "+51", flag: "🇵🇪", name: "Perú" },
-  { code: "+58", flag: "🇻🇪", name: "Venezuela" },
+  { code: "+52",  flag: "🇲🇽", name: "México" },
+  { code: "+1",   flag: "🇺🇸", name: "EE.UU. / Canadá" },
+  { code: "+57",  flag: "🇨🇴", name: "Colombia" },
+  { code: "+54",  flag: "🇦🇷", name: "Argentina" },
+  { code: "+56",  flag: "🇨🇱", name: "Chile" },
+  { code: "+51",  flag: "🇵🇪", name: "Perú" },
+  { code: "+58",  flag: "🇻🇪", name: "Venezuela" },
   { code: "+593", flag: "🇪🇨", name: "Ecuador" },
   { code: "+502", flag: "🇬🇹", name: "Guatemala" },
   { code: "+503", flag: "🇸🇻", name: "El Salvador" },
@@ -264,11 +264,11 @@ export default function SolicitudPage() {
                       <select
                         value={phonePrefixes[field.id] ?? "+52"}
                         onChange={(e) => setPrefix(field.id, e.target.value)}
-                        className="rounded-2xl border border-white/10 bg-white/10 px-3 py-3 text-sm text-white outline-none focus:border-white/30 [color-scheme:dark] shrink-0"
+                        className="w-28 rounded-2xl border border-white/10 bg-white/10 px-3 py-3 text-sm text-white outline-none focus:border-white/30 [color-scheme:dark] shrink-0"
                       >
                         {COUNTRY_CODES.map((c) => (
                           <option key={c.code} value={c.code}>
-                            {c.flag} {c.code} {c.name}
+                            {c.flag} {c.code} — {c.name}
                           </option>
                         ))}
                       </select>

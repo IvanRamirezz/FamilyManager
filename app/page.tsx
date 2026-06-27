@@ -10,6 +10,7 @@ import { CreateGroupModal } from "@/components/dashboard/create-group-modal";
 import { ExpiringGroups } from "@/components/dashboard/expiring-groups";
 import { GroupsTable } from "@/components/dashboard/groups-table";
 import { CodigosCard } from "@/components/dashboard/codigos-card";
+import { FormLinkCard } from "@/components/dashboard/form-link-card";
 import { SolicitudesTable } from "@/components/solicitudes/solicitudes-table";
 type View = "Dashboard" | "Grupos" | "Solicitudes";
 
@@ -76,7 +77,10 @@ export default function DashboardPage() {
               <div className="col-span-2">
                 <CreateGroupModal />
               </div>
-              <CodigosCard />
+              <div className="flex flex-col gap-4">
+                <FormLinkCard />
+                <CodigosCard />
+              </div>
             </div>
 
             <div className="mt-6">

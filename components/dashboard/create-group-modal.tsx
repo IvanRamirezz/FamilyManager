@@ -49,7 +49,7 @@ function Row({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[180px_1fr] items-center gap-4 border-b border-white/5 py-4">
+    <div className="grid grid-cols-[140px_1fr] items-center gap-4 border-b border-white/5 py-4">
       <span className="text-sm text-white/50">
         {label}
       </span>
@@ -335,7 +335,7 @@ export function CreateGroupModal() {
               "
             >
               <Mail size={14} />
-              Generar correo
+              Generar
             </button>
           </div>
 
@@ -505,7 +505,7 @@ export function CreateGroupModal() {
               "
             >
               <Lock size={14} />
-              Generar contraseña
+              Generar
             </button>
           </div>
         </Row>
